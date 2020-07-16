@@ -1,13 +1,5 @@
-# PROBLEM 3
-#
-# Modify the below functions acceleration and 
-# ship_trajectory to plot the trajectory of a 
-# spacecraft with the given initial position 
-# and velocity. Use the Forward Euler Method 
-# to accomplish this.
-
 import numpy
-import matplotlib
+import matplotlib.pyplot as plt
 
 h = 1.0 # s
 earth_mass = 5.97e24 # kg
@@ -41,12 +33,13 @@ def ship_trajectory():
 x, v = ship_trajectory()
 
 def plot_me():
-    matplotlib.pyplot.plot(x[:, 0], x[:, 1])
-    matplotlib.pyplot.scatter(0, 0)
-    matplotlib.pyplot.axis('equal')
-    axes = matplotlib.pyplot.gca()
+    plt.plot(x[:, 0], x[:, 1])
+    plt.scatter(0, 0)
+    plt.axis('equal')
+    axes = plt.gca()
     axes.set_xlabel('Longitudinal position in m')
     axes.set_ylabel('Lateral position in m')
+
 plot_me()
     
 
