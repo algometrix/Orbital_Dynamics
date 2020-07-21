@@ -1,17 +1,8 @@
-
-# coding: utf-8
-
-# In[25]:
-
-
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.animation import FuncAnimation
 import numpy as np
 import math
-
-
-# In[46]:
-
 
 earth_mass = 5.97e24 # kg
 earth_radius = 6.378e6 # m (at equator)
@@ -22,30 +13,18 @@ moon_distance = 400.5e6 # m (actually, not at all a constant)
 moon_period = 27.3 * 24.0 * 3600. # s
 moon_initial_angle = math.pi / 180. * -61. # radian
 
-total_duration = 2 * 12. * 24. * 3600. # s
+total_duration = 4 * 12. * 24. * 3600. # s
 marker_time = 0.5 * 3600. # s
 tolerance = 100000. # m
 
-
-# In[47]:
-
-
 def moon_position(time):
-# Task 1: Compute the moon's position (a vector) at time t. Let it start at moon_initial_angle, not on the horizontal axis.   
-    ###Your code here.
     position = np.zeros(2)
     moon_angle = moon_initial_angle + 2 * math.pi * time/moon_period 
     position[0] = moon_distance * math.cos(moon_angle)
     position[1] = moon_distance * math.sin(moon_angle)
     return position
 
-
-# In[48]:
-
-
 def acceleration(time, position):
-# Task 2: Compute the spacecraft's acceleration due to gravity
-	###Your code here.
     moon_pos = moon_position(time)
     moon_vector = position - moon_pos
     earth_vector = position
@@ -53,24 +32,13 @@ def acceleration(time, position):
     return acc  
 
 
-# In[49]:
-
-
 axes = plt.gca()
 axes.set_xlabel('Longitudinal position in m')
 axes.set_ylabel('Lateral position in m')
 
-
-# In[50]:
-
-
 def apply_boost():
 
-    # Do not worry about the arrays position_list, velocity_list, and times_list.  
-    # They are simply used for plotting and evaluating your code, so none of the 
-    # code that you add should involve them.
-    
-    boost = -10. # m/s Change this to the correct value from the list above after everything else is done.
+    boost = 10. # m/s Change this to the correct value from the list above after everything else is done.
     position_list = [np.array([-6.701e6, 0.])] # m
     velocity_list = [np.array([0., -10.818e3])] # m / s
     times_list = [0]
@@ -83,22 +51,16 @@ def apply_boost():
     dps1_burn_done = False
 
     while current_time < total_duration:
-        #Task 3: Include a retrograde rocket burn at 101104 seconds that reduces the velocity by 7.04 m/s
-        # and include a rocket burn that increases the velocity at 212100 seconds by the amount given in the variable called boost.
-        # Both velocity changes should happen in the direction of the rocket's motion at the time they occur.
-        
-        ###Your code here.
         if mcc2_burn_done is False and current_time >= 101104:
             velocity -= 7.04 * velocity / np.linalg.norm(velocity)
-            plt.scatter(position[0], position[1], s = 16., facecolor = 'r', edgecolor = 'none')
+            #plt.scatter(position[0], position[1], s = 16., facecolor = 'r', edgecolor = 'none')
             mcc2_burn_done = True
         
         if dps1_burn_done is False and current_time >= 212100:
             velocity += boost * velocity / np.linalg.norm(velocity)
-            plt.scatter(position[0], position[1], s = 16., facecolor = 'g', edgecolor = 'none')
+            #plt.scatter(position[0], position[1], s = 16., facecolor = 'g', edgecolor = 'none')
             dps1_burn_done = True
-        #Task 4: Implement Heun's method with adaptive step size. Note that the time is advanced at the end of this while loop.
-        ###Your code here.
+
         _acc = acceleration(current_time, position)
         velocityE = velocity + h * _acc
         positionE = position + h * velocity
@@ -106,7 +68,7 @@ def apply_boost():
         positionH = position + h * 0.5 * (velocity + velocityE)
         velocity = velocityH
         position = positionH
-        ###Your code here.
+
         error = np.linalg.norm(positionE - positionH) + total_duration * np.linalg.norm(velocityE - velocityH)
         h_new = h * math.sqrt(tolerance/error)
         h_new = min(0.5 * marker_time, max(0.1, h_new)) # restrict step size to reasonable range
@@ -119,13 +81,7 @@ def apply_boost():
 
     return position_list, velocity_list, times_list, boost
 
-
-# In[ ]:
-
-
 position, velocity, current_time, boost = apply_boost()
-
-# In[ ]:
 
 
 def plot_path(position_list, times_list):
@@ -139,7 +95,7 @@ def plot_path(position_list, times_list):
             plt.scatter(position[0], position[1], s = 2., facecolor = 'r', edgecolor = 'none')
             moon_pos = moon_position(current_time)
             if np.linalg.norm(position - moon_pos) < 30. * moon_radius: 
-                axes.add_line(matplotlib.lines.Line2D([position[0], moon_pos[0]], [position[1], moon_pos[1]], alpha = 0.3, c = 'b')) 
+                    axes.add_line(matplotlib.lines.Line2D([position[0], moon_pos[0]], [position[1], moon_pos[1]], alpha = 0.3, c = 'b')) 
     axes.add_patch(matplotlib.patches.CirclePolygon((0., 0.), earth_radius, facecolor = 'none', edgecolor = 'b'))
     for i in range(int(total_duration / marker_time)):
         moon_pos = moon_position(i * marker_time)
@@ -149,8 +105,38 @@ def plot_path(position_list, times_list):
     plt.show()
 
 
-# In[ ]:
+#plot_path(position, current_time)
 
+fig, ax = plt.subplots()
+spacecraftX, spacecraftY = [], []
+moonX, moonY = [], []
+spacecraft_ln, = plt.plot([], [], 'r')
+moon_ln, = plt.plot([], [], 'b.')
+earth_ln, = plt.plot([], [], 'go')
 
-plot_path(position, current_time)
+def init():
+    graph_range = 2 * moon_distance
+    ax.set_xlim(-graph_range/10, graph_range/1.75)
+    ax.set_ylim(-graph_range/2, graph_range/2)
+    return spacecraft_ln, moon_ln, earth_ln
 
+def update(frame):
+    time = current_time[frame]   
+    moon_pos = moon_position(time) 
+    #print('Spacecraft Position : {}'.format(position[frame]))
+    #print('Moon Position : {}'.format(moon_pos))
+    spacecraftX.append(position[frame][0])
+    spacecraftY.append(position[frame][1])
+    spacecraft_ln.set_data(spacecraftX, spacecraftY)
+    spacecraft_ln.set_label('Spacecraft')
+    moon_ln.set_data([moon_pos[0]], [moon_pos[1]])
+    moon_ln.set_label('Moon')
+    earth_ln.set_data([0],[0])
+    earth_ln.set_label('Earth')
+    return spacecraft_ln, moon_ln, earth_ln, plt.legend()
+
+data_length = len(position)
+
+ani = FuncAnimation(fig, update, frames=range(data_length),
+                    init_func=init, blit=True, interval=1)
+plt.show()
