@@ -13,7 +13,7 @@ moon_distance = 400.5e6 # m (actually, not at all a constant)
 moon_period = 27.3 * 24.0 * 3600. # s
 moon_initial_angle = math.pi / 180. * -61. # radian
 
-total_duration = 4 * 12. * 24. * 3600. # s
+total_duration = 2 * 12. * 24. * 3600. # s
 marker_time = 0.5 * 3600. # s
 tolerance = 100000. # m
 
@@ -32,9 +32,9 @@ def acceleration(time, position):
     return acc  
 
 
-axes = plt.gca()
-axes.set_xlabel('Longitudinal position in m')
-axes.set_ylabel('Lateral position in m')
+#axes = plt.gca()
+#axes.set_xlabel('Longitudinal position in m')
+#axes.set_ylabel('Lateral position in m')
 
 def apply_boost():
 
@@ -110,7 +110,7 @@ def plot_path(position_list, times_list):
 fig, ax = plt.subplots()
 spacecraftX, spacecraftY = [], []
 moonX, moonY = [], []
-spacecraft_ln, = plt.plot([], [], 'r')
+spacecraft_ln, = plt.plot([], [], 'r', linestyle=':')
 moon_ln, = plt.plot([], [], 'b.')
 earth_ln, = plt.plot([], [], 'go')
 
