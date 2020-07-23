@@ -5,7 +5,7 @@ import numpy as np
 import math
 
 earth_mass = 5.97e24 # kg
-earth_radius = 6.378e6 # m (at equator)
+earth_radius = 6.378e6  # m (at equator)
 gravitational_constant = 6.67e-11 # m3 / kg s2
 moon_mass = 7.35e22 # kg
 moon_radius = 1.74e6 # m
@@ -28,13 +28,11 @@ def acceleration(time, position):
     moon_pos = moon_position(time)
     moon_vector = position - moon_pos
     earth_vector = position
-    acc = - gravitational_constant * earth_mass * earth_vector/np.linalg.norm(earth_vector)**3 - gravitational_constant * moon_mass * moon_vector/np.linalg.norm(moon_vector)**3
+    acc = - gravitational_constant * earth_mass * earth_vector/np.linalg.norm(earth_vector)**3 - \
+            gravitational_constant * moon_mass * moon_vector/np.linalg.norm(moon_vector)**3
+    
     return acc  
 
-
-#axes = plt.gca()
-#axes.set_xlabel('Longitudinal position in m')
-#axes.set_ylabel('Lateral position in m')
 
 def apply_boost():
 
@@ -81,38 +79,7 @@ def apply_boost():
 
     return position_list, velocity_list, times_list, boost
 
-position, velocity, current_time, boost = apply_boost()
 
-
-def plot_path(position_list, times_list):
-    axes = plt.gca()
-    axes.set_xlabel('Longitudinal position in m')
-    axes.set_ylabel('Lateral position in m')
-    previous_marker_number = -1;
-    for position, current_time in zip(position_list, times_list):
-         if current_time >= marker_time * previous_marker_number:
-            previous_marker_number += 1
-            plt.scatter(position[0], position[1], s = 2., facecolor = 'r', edgecolor = 'none')
-            moon_pos = moon_position(current_time)
-            if np.linalg.norm(position - moon_pos) < 30. * moon_radius: 
-                    axes.add_line(matplotlib.lines.Line2D([position[0], moon_pos[0]], [position[1], moon_pos[1]], alpha = 0.3, c = 'b')) 
-    axes.add_patch(matplotlib.patches.CirclePolygon((0., 0.), earth_radius, facecolor = 'none', edgecolor = 'b'))
-    for i in range(int(total_duration / marker_time)):
-        moon_pos = moon_position(i * marker_time)
-        axes.add_patch(matplotlib.patches.CirclePolygon(moon_pos, moon_radius, facecolor = 'none', edgecolor = 'g', alpha = 0.7))
-
-    plt.axis('equal')
-    plt.show()
-
-
-#plot_path(position, current_time)
-
-fig, ax = plt.subplots()
-spacecraftX, spacecraftY = [], []
-moonX, moonY = [], []
-spacecraft_ln, = plt.plot([], [], 'r', linestyle=':')
-moon_ln, = plt.plot([], [], 'b.')
-earth_ln, = plt.plot([], [], 'go')
 
 def init():
     graph_range = 2 * moon_distance
@@ -123,8 +90,6 @@ def init():
 def update(frame):
     time = current_time[frame]   
     moon_pos = moon_position(time) 
-    #print('Spacecraft Position : {}'.format(position[frame]))
-    #print('Moon Position : {}'.format(moon_pos))
     spacecraftX.append(position[frame][0])
     spacecraftY.append(position[frame][1])
     spacecraft_ln.set_data(spacecraftX, spacecraftY)
@@ -135,8 +100,19 @@ def update(frame):
     earth_ln.set_label('Earth')
     return spacecraft_ln, moon_ln, earth_ln, plt.legend()
 
-data_length = len(position)
 
-ani = FuncAnimation(fig, update, frames=range(data_length),
-                    init_func=init, blit=True, interval=1)
-plt.show()
+if __name__ == "__main__":
+    position, velocity, current_time, boost = apply_boost()
+
+    fig, ax = plt.subplots()
+    spacecraftX, spacecraftY = [], []
+    moonX, moonY = [], []
+    spacecraft_ln, = plt.plot([], [], 'r', linestyle=':')
+    moon_ln, = plt.plot([], [], 'b.')
+    earth_ln, = plt.plot([], [], 'go')
+
+    data_length = len(position)
+
+    ani = FuncAnimation(fig, update, frames=range(data_length),
+                        init_func=init, blit=True, interval=1)
+    plt.show()
